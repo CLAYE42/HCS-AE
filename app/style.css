@@ -1,0 +1,103 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 3vh;
+}
+
+/* .recognised {
+  background: #66bb6a !important;
+}
+
+.unrecognised {
+  background: #ef5350 !important;
+} */
+#grid {
+  display: inline-block;
+  height: !important;
+}
+.circle {
+  width: 250px;
+  height: 250px;
+  line-height: 250px;
+  border-radius: 50%;
+  font-size: 100px;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: #000;
+}
+
+.circleDelete {
+  width: 250px;
+  height: 250px;
+  line-height: 250px;
+  border-radius: 50%;
+  font-size: 180px;
+  color: #fff;
+  text-align: center;
+  background: #E3170A;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.circleConfirm {
+  width: 250px;
+  height: 250px;
+  line-height: 250px;
+  border-radius: 50%;
+  font-size: 150px;
+  color: #fff;
+  text-align: center;
+  background-color: #109648;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.cursor {
+  width: 150px;
+  height: 150px;
+  line-height: 150px;
+  border-radius: 50%;
+  font-size: 150px;
+  color: #fff;
+  text-align: center;
+  background-color: rgba(107, 127, 130, 0.85);
+  position: absolute;
+  display: none;
+}
+.cursor.visible {
+        display: block; /* Show the visible cursor */
+}
+.NumberOutput {
+  text-align: center;
+  font-size: 100px;
+  padding: 3rem;
+}
+.numberGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem; 
+  padding: 2rem;
+  align-items: center;
+  grid-auto-rows: 250px;
+  justify-content: center;
+ 
+}
+.container {
+  position: relative;
+}
+.testBox {
+  background-color: gray
+}
+.iosButton{
+  display: block;
+  margin: 20px auto; /* Adjust the margin as needed for vertical spacing */
+  padding: 30px 40px; /* Adjust padding for button size */
+  font-size: 40px; /* Adjust font size if needed */
+  background-color: #007bff; /* Set your desired background color */
+  color: #fff; /* Set your desired text color */
+  border: none;
+  border-radius: 5px; /* Adjust border radius for rounded corners */
+  cursor: pointer;
+}

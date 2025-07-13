@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Swipe Gestures</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://hammerjs.github.io/dist/hammer.js" defer></script>
+    <script defer>
+            let hammer = null;
+            let touchArea = null;
+            let gestureDeltaX = null;
+            let gestureDeltaY = null;
+            let gestureDistance = null;
+            let gestureDuration = null;
+            let cursorState = 0; // Starting cursor position
+
+            /*
+             * Swipe gesture callback, fired after a swipe has been detected.
+             */
+            function onSwipe(e) {
+              let maxDuration = 300;
+              if (e.deltaTime <= maxDuration) {
+                if (e.deltaX > 200) {
+                  swipeRight();
+                } else if (e.deltaX < -200) {
+                  swipeLeft();
+                } else if (e.deltaX < 200 && e.deltaY > 200) {
+                  swipeDown();
+                } else if (e.deltaX < 200 && e.deltaY < -200) {
+                  swipeUp();
+                } else {
+                  unrecognised();
+                }
+              }
+            }
+
+            function swipeUp() {
+              recognised();
+              // touchArea.textContent = "↑";
+              changeCursorState(cursorState - 3); // Move up by 3
+            }
+
+            function swipeDown() {
+              recognised();
+              // touchArea.textContent = "↓";
+              changeCursorState(cursorState + 3); // Move down by 3
+            }
+
+            function swipeLeft() {
+              recognised();
+              // touchArea.textContent = "←";
+              changeCursorState(cursorState - 1); // Move left by 1
+            }
+
+            function swipeRight() {
+              recognised();
+              // touchArea.textContent = "→";
+              changeCursorState(cursorState + 1); // Move right by 1
+            }
+
+            function recognised() {
+              // touchArea.className = "recognised";
+            }
+
+            function unrecognised() {
+              // touchArea.textContent = "x";
+              // touchArea.className = "unrecognised";
+            }
+
+            function changeCursorState(newState) {
+              cursorState = Math.min(12, Math.max(0, newState));
+              const cursors = document.querySelectorAll(".cursor");
+              cursors.forEach((cursor) => {
+                cursor.classList.remove("visible");
+
+                const circleId = cursor.parentElement.id;
+
+                if (circleId === "C" + newState) {
+                  cursor.classList.add("visible");
+                } else {
+                  cursor.classList.remove("visible");
+                }
+              });
+            }
+
+            function updateCursorVisibility() {
+              const cursors = document.querySelectorAll(".cursor");
+              cursors.forEach((cursor, index) => {
+                if (index === cursorState) {
+                  cursor.classList.add("visible");
+                } else {
+                  cursor.classList.remove("visible");
+                }
+              });
+            }
+
+            function roundNumber(x) {
+              return Math.round((x + Number.EPSILON) * 100) / 100;
+            }
+
+            /*
+             * Returns the current time in milliseconds as a number.
+             */
+            function timeMilliseconds() {
+              return Date.now();
+            }
+
+            /*
+             * Device orientation callback -- called each time sensor updates.
+             */
+            let selectionStarted = false;
+            let lastSelection = 0;
+
+            function callbackOrientation(event) {
+              let gamma = event.gamma;
+
+              const OutputBox = document.querySelector(".NumberOutput");
+              const cursors = document.querySelectorAll(".cursor");
+              let selectedCircle = null;
+
+              // Find the cursor associated with the currently selected circle
+              cursors.forEach((cursor, index) => {
+                if (cursor.classList.contains("visible")) {
+                  selectedCircle = document.getElementById(`C${index + 1}`);
+                }
+              });
+
+              if (!selectedCircle) {
+                // Handle the case when no visible circle is found
+                return;
+              }
+
+              const circleId = selectedCircle.id;
+              const number = circleId.substring(1); // Extract the number by removing the first character ("C")
+
+              // Check if user tilted the device to confirm a selection
+              if (gamma <= -30 || gamma >= 30) {
+                let now = timeMilliseconds();
+
+                if (!selectionStarted && now - lastSelection >= 1000) {
+                  selectionStarted = true;
+                  lastSelection = now;
+
+                  if (OutputBox) {
+                    if (number === "10") {
+                      OutputBox.textContent = "";
+                    } else if (number === "11") {
+                      if (OutputBox.textContent.length < 15) {
+                        OutputBox.style.backgroundColor = "green";
+                        OutputBox.textContent += "0";
+                      }
+                    } else if (number === "12") {
+                      OutputBox.style.backgroundColor = "red";
+                      OutputBox.textContent = OutputBox.textContent.slice(0, -1);
+                    } else {
+                      if (OutputBox.textContent.length < 15) {
+                        OutputBox.style.backgroundColor = "green";
+                        OutputBox.textContent += number;
+                      }
+                    }
+                  }
+                }
+
+                console.log(lastSelection);
+              } else {
+                if (selectionStarted) {
+                  selectionStarted = false;
+                  // // Reset testBox style and content when tilt condition is not met
+                  OutputBox.style.backgroundColor = "white";
+                }
+              }
+            }
+            /*
+             * Asks iOS 13+ users for permission to access device motion data.
+             */
+            function applePermissions() {
+              if (
+                DeviceMotionEvent &&
+                typeof DeviceMotionEvent.requestPermission === "function"
+              ) {
+                DeviceMotionEvent.requestPermission();
+              }
+            }
+
+            window.onload = function onLoad() {
+              touchArea = document.getElementById("grid");
+              touchArea.style.height = window.innerHeight * 0.77 + "px";
+
+              window.addEventListener("deviceorientation", callbackOrientation);
+
+              changeCursorState(5);
+
+              hammer = new Hammer.Manager(touchArea, {
+                recognizers: [[Hammer.Swipe, { direction: Hammer.DIRECTION_ALL }]],
+              });
+
+              hammer.on("swipe", onSwipe);
+            };
+    </script>
+  </head>
+  <body>
+    <div class="NumberOutput"></div>
+    <div id="grid">
+      <div class="numberGrid">
+        <div class="circle" id="C1">
+          <div class="cursor"></div>
+          1
+        </div>
+        <div class="circle" id="C2">
+          <div class="cursor"></div>
+          2
+        </div>
+        <div class="circle" id="C3">
+          <div class="cursor"></div>
+          3
+        </div>
+        <div class="circle" id="C4">
+          <div class="cursor"></div>
+          4
+        </div>
+        <div class="circle" id="C5">
+          <div class="cursor"></div>
+          5
+        </div>
+        <div class="circle" id="C6">
+          <div class="cursor"></div>
+          6
+        </div>
+        <div class="circle" id="C7">
+          <div class="cursor"></div>
+          7
+        </div>
+        <div class="circle" id="C8">
+          <div class="cursor"></div>
+          8
+        </div>
+        <div class="circle" id="C9">
+          <div class="cursor"></div>
+          9
+        </div>
+        <div class="circleConfirm" id="C10">
+          <div class="cursor"></div>
+          &#x2713;
+        </div>
+        <div class="circle" id="C11">
+          <div class="cursor"></div>
+          0
+        </div>
+        <div class="circleDelete" id="C12">
+          <div class="cursor"></div>
+          &#x232B;
+        </div>
+      </div>
+      <button class="iosButton" onclick="applePermissions()">iOS Start</button>
+    </div>
+  </body>
+</html>
